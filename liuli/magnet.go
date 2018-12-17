@@ -16,5 +16,9 @@ func GetMagnet(id string) []string {
 	}
 	content := GetContentNoStyle(doc)
 	exp := regexp.MustCompile("[a-zA-Z0-9]{40}")
-	return exp.FindAllString(content, -1)
+	magnet := exp.FindAllString(content, -1)
+	for i := 0; i < len(magnet); i++ {
+		magnet[i] = "magnet:?xt=urn:btih:" + magnet[i]
+	}
+	return magnet
 }
