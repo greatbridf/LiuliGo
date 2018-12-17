@@ -24,8 +24,22 @@ func main() {
 		fmt.Println(liuli.GetArticlesJSON(articles))
 		break
 	case "content":
-		fmt.Printf("Content-Type: text/plain; charset=utf-8\n\n")
-		fmt.Printf("OK!")
+		id := query.Get("id")
+		if id == "" {
+			// TODO : Standardization error output
+			fmt.Printf("Content-Type: text/plain; charset=utf-8\n\n")
+			fmt.Println("Error: no content id given")
+			return
+		}
+		content := liuli.GetContent(id)
+		if content == "" {
+			// TODO : Standardization error output
+			fmt.Printf("Content-Type: text/plain; charset=utf-8\n\n")
+			fmt.Println("Error: no content id given")
+			return
+		}
+		fmt.Printf("Content-Type: text/html; charset=utf-8\n\n")
+		fmt.Println(content)
 		break
 	case "magnet":
 		fmt.Printf("Content-Type: text/plain; charset=utf-8\n\n")
