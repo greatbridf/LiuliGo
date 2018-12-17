@@ -38,8 +38,17 @@ func main() {
 		fmt.Println(content)
 		break
 	case "magnet":
+		id := query.Get("id")
+		if id == "" {
+			liuli.PrintError("No content id given")
+			return
+		}
+		magnet := liuli.GetMagnet(id)
+		if len(magnet) == 0 {
+			liuli.PrintError("No magnet link found in " + id)
+		}
 		fmt.Printf("Content-Type: text/plain; charset=utf-8\n\n")
-		fmt.Printf("OK!")
+		fmt.Println(magnet[0])
 		break
 	default:
 		liuli.PrintError("Invalid query method")
