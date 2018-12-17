@@ -23,7 +23,7 @@ type Article struct {
 
 // GetArticles get articles from hacg.me
 func GetArticles(page int) *Articles {
-	uri := "https://www.liuli.in/wp/"
+	uri := "https://www.hacg.me/wp/"
 	if page != 1 {
 		uri = "https://www.hacg.me/wp/page/" + strconv.Itoa(page)
 	}
