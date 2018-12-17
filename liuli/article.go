@@ -10,15 +10,15 @@ import (
 
 // Articles container of Article
 type Articles struct {
-	articles []Article
+	Articles []Article `json:"articles"`
 }
 
 // Article single liuli article
 type Article struct {
-	description string
-	img         string
-	link        string
-	title       string
+	Description string `json:"description"`
+	Img         string `json:"img"`
+	Link        string `json:"link"`
+	Title       string `json:"title"`
 }
 
 // GetArticles get articles from hacg.me
@@ -40,7 +40,7 @@ func GetArticles(page int) *Articles {
 		panic(err)
 	}
 	articles := new(Articles)
-	articles.articles = GetArticleArray(doc)
+	articles.Articles = GetArticleArray(doc)
 	return articles
 }
 
@@ -49,11 +49,11 @@ func GetArticleArray(doc *goquery.Document) []Article {
 	var articles []Article
 	doc.Find("article").Each(func(index int, selection *goquery.Selection) {
 		var tmp Article
-		tmp.description = selection.Find(".entry-content").Text()
-		tmp.img, _ = selection.Find("img").Attr("src")
-		tmp.link, _ = selection.Find(".more-link").Attr("href")
-		tmp.title = selection.Find(".entry-title").Text()
-		if tmp.title != "" {
+		tmp.Description = selection.Find(".entry-content").Text()
+		tmp.Img, _ = selection.Find("img").Attr("src")
+		tmp.Link, _ = selection.Find(".more-link").Attr("href")
+		tmp.Title = selection.Find(".entry-title").Text()
+		if tmp.Title != "" {
 			articles = append(articles, tmp)
 		}
 	})
