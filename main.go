@@ -15,27 +15,23 @@ func main() {
 	req := query.Get("req")
 	switch req {
 	case "articles":
-		fmt.Printf("Content-Type: application/json; charset=utf-8\n\n")
 		page, err := strconv.Atoi(query.Get("page"))
 		if err != nil {
 			page = 1
 		}
 		articles := liuli.GetArticles(page)
+		fmt.Printf("Content-Type: application/json; charset=utf-8\n\n")
 		fmt.Println(liuli.GetArticlesJSON(articles))
 		break
 	case "content":
 		id := query.Get("id")
 		if id == "" {
-			// TODO : Standardization error output
-			fmt.Printf("Content-Type: text/plain; charset=utf-8\n\n")
-			fmt.Println("Error: no content id given")
+			liuli.PrintError("No content id given")
 			return
 		}
 		content := liuli.GetContent(id)
 		if content == "" {
-			// TODO : Standardization error output
-			fmt.Printf("Content-Type: text/plain; charset=utf-8\n\n")
-			fmt.Println("Error: no content id given")
+			liuli.PrintError("Unable to get content")
 			return
 		}
 		fmt.Printf("Content-Type: text/html; charset=utf-8\n\n")
@@ -46,8 +42,7 @@ func main() {
 		fmt.Printf("OK!")
 		break
 	default:
-		fmt.Printf("Content-Type: text/plain; charset=utf-8\n\n")
-		fmt.Printf("NO!")
+		liuli.PrintError("Invalid query method")
 		break
 	}
 }
