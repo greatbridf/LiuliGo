@@ -18,7 +18,7 @@ func main() {
 		fmt.Printf("Content-Type: application/json; charset=utf-8\n\n")
 		page, err := strconv.Atoi(query.Get("page"))
 		if err != nil {
-			panic(err)
+			page = 1
 		}
 		articles := liuli.GetArticles(page)
 		fmt.Println(liuli.GetArticlesJSON(articles))
