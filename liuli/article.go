@@ -3,7 +3,6 @@ package liuli
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -22,10 +21,10 @@ type Article struct {
 }
 
 // GetArticles get articles from hacg.me
-func GetArticles(page int) *Articles {
+func GetArticles(page string) *Articles {
 	uri := "https://www.hacg.me/wp/"
-	if page != 1 {
-		uri = "https://www.hacg.me/wp/page/" + strconv.Itoa(page)
+	if page != "1" {
+		uri = "https://www.hacg.me/wp/page/" + page
 	}
 	res, err := http.Get(uri)
 	if err != nil {

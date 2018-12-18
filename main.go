@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/url"
 	"os"
-	"strconv"
 
 	"./liuli"
 )
@@ -15,9 +14,9 @@ func main() {
 	req := query.Get("req")
 	switch req {
 	case "articles":
-		page, err := strconv.Atoi(query.Get("page"))
-		if err != nil {
-			page = 1
+		page := query.Get("page")
+		if page == "" {
+			page = "1"
 		}
 		articles := liuli.GetArticles(page)
 		fmt.Printf("Content-Type: application/json; charset=utf-8\n\n")
