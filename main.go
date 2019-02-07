@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"os"
 
-	"./liuli"
+	"github.com/greatbridf/LiuliGo/liuli"
 )
 
 func main() {
