@@ -1,4 +1,5 @@
 # LiuliGo
+[![Build Status](https://travis-ci.com/greatbridf/LiuliGo.svg?token=ncMN4paT5YpmskkyPYRb&branch=master)](https://travis-ci.com/greatbridf/LiuliGo)  
 A simple go-based hacg.me articles getter
 ## Build args
 ### Archs

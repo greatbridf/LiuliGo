@@ -6,7 +6,7 @@ script:
   - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o LiuliGo.cgi
 
 deploy:
-  provider: release
+  provider: releases
   skip_cleanup: true
   api_key: $GH_TOKEN
   file: LiuliGo.cgi
