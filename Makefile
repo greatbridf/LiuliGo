@@ -20,3 +20,5 @@ test : LiuliGo.cgi
 .PHONY : clean
 clean :
 	-rm *.cgi
+	-rm -rf caches/
+	-rm *.log
