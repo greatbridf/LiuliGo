@@ -1,24 +1,30 @@
 package liuli
 
 import (
-    "os"
-    "fmt"
+	"errors"
+	"os"
+
+	logger "github.com/greatbridf/go-logger"
 )
 
-var filename = "LiuliGo.log"
+var (
+	filename string = "LiuliGo.log"
+	log      *logger.Logger
+)
+
+func init() {
+	file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		panic(errors.New("Cannot open log file"))
+	}
+	log = logger.New(file, "LiuliGo")
+}
 
 // PrintError Print error message to stdout
 func PrintError(msg string) {
-    file, _ := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
-    file.WriteString("[ERROR] " + msg + "\n")
-    file.Close()
-	fmt.Printf("Content-Type: text/plain; charset=utf-8\n\n")
-	fmt.Println("Error:", msg)
+	log.E(msg)
 }
 
 func PrintDebug(msg string) {
-    file, _ := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
-    file.WriteString("[DEBUG] " + msg + "\n")
-    file.Close()
+	log.D(msg)
 }
-

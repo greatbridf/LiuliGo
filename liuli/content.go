@@ -10,8 +10,8 @@ func GetContent(id string) string {
 	cache := Cache{}
 	cache.Init("caches/index")
 	defer cache.Close()
-	cachedata, fin := cache.Get(id)
-	if fin {
+	cachedata, ok := cache.Get(id)
+	if ok {
 		return string(cachedata)
 	}
 
