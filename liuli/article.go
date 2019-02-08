@@ -46,10 +46,19 @@ func GetArticles(page string) *Articles {
 // GetArticleArray get Article Objects from goquery document
 func GetArticleArray(doc *goquery.Document) []Article {
 	var articles []Article
+	cache := Cache{}
+	cache.Init("caches/index")
+	defer cache.Close()
 	doc.Find("article").Each(func(index int, selection *goquery.Selection) {
 		var tmp Article
 		tmp.Description = selection.Find(".entry-content").Text()
-		tmp.Img, _ = selection.Find("img").Attr("src")
+		img_link, _ := selection.Find("img").Attr("src")
+		if cache.Find(img_link) {
+			PrintDebug("Get " + img_link + " from cache")
+			tmp.Img = "http://144.202.106.87/interface/LiuliGo.cgi?req=resource&hash=" + cache.GetHash(img_link)
+		} else {
+			// TODO save image to cache
+		}
 		tmp.Link, _ = selection.Find(".more-link").Attr("href")
 		tmp.Title = selection.Find(".entry-title").Text()
 		if tmp.Title != "" {

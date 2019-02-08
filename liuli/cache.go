@@ -64,6 +64,11 @@ func (c Cache) Find(id string) bool {
 	return exists
 }
 
+func (c Cache) GetHash(id string) string {
+	hash, _ := c.list[id]
+	return hash
+}
+
 func (c *Cache) Close() {
 	c.index.Close()
 }

@@ -51,6 +51,10 @@ func main() {
 			fmt.Println(magnet[i])
 		}
 		break
+	case "resource":
+		hash := query.Get("hash")
+		// TODO
+		break
 	default:
 		liuli.PrintError("Invalid query method")
 		break
