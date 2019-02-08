@@ -2,8 +2,7 @@ package liuli
 
 import (
 	"encoding/json"
-	"io/ioutil"
-	"net/http"
+	"github.com/pkg/errors"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -22,67 +21,78 @@ type Article struct {
 }
 
 // GetArticles get articles from hacg.me
-func GetArticles(page string) *Articles {
+func GetArticles(page string) (*Articles, error) {
 	uri := "https://www.hacg.me/wp/"
 	if page != "1" {
 		uri = "https://www.hacg.me/wp/page/" + page
 	}
-	res, err := http.Get(uri)
+	doc, err := goquery.NewDocument(uri)
 	if err != nil {
-		panic(err)
+		Log.E(err.Error())
+		return nil, errors.Wrap(err, ERR_CANNOT_GOQUERY)
 	}
-	defer res.Body.Close()
-	if res.StatusCode != 200 {
-		panic(res.StatusCode)
-	}
-	doc, err := goquery.NewDocumentFromReader(res.Body)
+	tmp, err := GetArticleArray(doc)
 	if err != nil {
-		panic(err)
+		Log.E(err.Error())
+		return nil, errors.Wrap(err, "Cannot get article array")
 	}
-	articles := new(Articles)
-	articles.Articles = GetArticleArray(doc)
-	return articles
+	articles := &Articles{
+		Articles: tmp,
+	}
+	return articles, nil
 }
 
 // GetArticleArray get Article Objects from goquery document
-func GetArticleArray(doc *goquery.Document) []Article {
+func GetArticleArray(doc *goquery.Document) ([]Article, error) {
 	var articles []Article
+	var ERR error
 	cache := Cache{}
-	cache.Init("caches/index")
+	err := cache.Init()
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
 	defer cache.Close()
 	doc.Find("article").Each(func(index int, selection *goquery.Selection) {
-		var tmp Article
-		tmp.Description = selection.Find(".entry-content").Text()
+		if ERR != nil {
+			return
+		}
+		tmp := Article{
+			Description: selection.Find(".entry-content").Text(),
+			Title:       selection.Find(".entry-title").Text(),
+		}
+		if tmp.Title == "" {
+			return
+		}
+		tmp.Link, _ = selection.Find(".more-link").Attr("href")
 		img_link, _ := selection.Find("img").Attr("src")
 		if !cache.Find(img_link) {
-			res, err := http.Get(img_link)
+			data, err := ReadFromURI(img_link)
 			if err != nil {
-				PrintError(err.Error())
-				panic(err)
+				ERR = errors.Wrap(err, "Cannot get title image")
+				return
 			}
-			body, err := ioutil.ReadAll(res.Body)
+			err = cache.Add(img_link, data)
 			if err != nil {
-				PrintError(err.Error())
-				panic(err)
+				ERR = errors.Wrap(err, "Cannot add title image to cache")
+				return
 			}
-			cache.Add(img_link, body)
-			res.Body.Close()
 		}
 		tmp.Img = "http://144.202.106.87/interface/LiuliGo.cgi?req=resource&hash=" + cache.GetHash(img_link)
-		tmp.Link, _ = selection.Find(".more-link").Attr("href")
-		tmp.Title = selection.Find(".entry-title").Text()
-		if tmp.Title != "" {
-			articles = append(articles, tmp)
-		}
+		articles = append(articles, tmp)
 	})
-	return articles
+	if ERR != nil {
+		Log.E(ERR.Error())
+		return nil, ERR
+	}
+	return articles, nil
 }
 
 // GetArticlesJSON convert Articles Objecet into json string
-func GetArticlesJSON(articles *Articles) string {
+func GetArticlesJSON(articles *Articles) (string, error) {
 	jsonByteArray, err := json.Marshal(articles)
 	if err != nil {
-		panic(err)
+		Log.E(err.Error())
+		return "", errors.Wrap(err, "Cannot stringify JSON")
 	}
-	return string(jsonByteArray)
+	return string(jsonByteArray), nil
 }

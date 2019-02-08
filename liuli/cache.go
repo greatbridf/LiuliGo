@@ -2,6 +2,7 @@ package liuli
 
 import (
 	"bufio"
+	"github.com/pkg/errors"
 	"io"
 	"io/ioutil"
 	"os"
@@ -15,12 +16,12 @@ type Cache struct {
 	rev   map[string]string
 }
 
-func (c *Cache) Init(indexPath string) {
+func (c *Cache) Init() error {
 	c.list = make(map[string]string)
 	c.rev = make(map[string]string)
-	tmp_file, err := os.OpenFile(indexPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	tmp_file, err := os.OpenFile("caches/index", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
-		PrintError("Cannot open cache file!")
+		return errors.WithStack(err)
 	}
 	c.index = tmp_file
 	br := bufio.NewReader(c.index)
@@ -33,28 +34,30 @@ func (c *Cache) Init(indexPath string) {
 		c.list[id_and_hash[0]] = id_and_hash[1]
 		c.rev[id_and_hash[1]] = id_and_hash[0]
 	}
+	return nil
 }
 
-func (c *Cache) Add(id string, data []byte) {
+func (c *Cache) Add(id string, data []byte) error {
 	hash := Hash(data)
 	c.list[id] = hash
 	c.rev[hash] = id
 	c.index.WriteString(id + " " + hash + "\n")
 	err := ioutil.WriteFile("caches/"+hash, data, 0666)
 	if err != nil {
-		PrintError("Cannot write cache!")
+		return errors.Wrap(err, "Cannot write cache file")
 	}
-	PrintDebug("Add " + id + " to cache!")
+	Log.D("Add " + id + " to cache!")
+	return nil
 }
 
-func (c Cache) Get(id string) ([]byte, bool) {
+func (c Cache) Get(id string) ([]byte, error) {
 	data, err := ioutil.ReadFile("caches/" + c.GetHash(id))
 	if err != nil {
-		PrintError("Cannot read from cache!")
-		return nil, false
+		Log.D(err.Error())
+		return nil, errors.WithStack(err)
 	}
 	PrintDebug("Get " + id + " from cache")
-	return data, true
+	return data, nil
 }
 
 func (c Cache) Find(id string) bool {

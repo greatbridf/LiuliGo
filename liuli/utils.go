@@ -2,6 +2,9 @@ package liuli
 
 import (
 	"bytes"
+	"github.com/pkg/errors"
+	"io/ioutil"
+	"net/http"
 
 	"crypto/md5"
 	"encoding/hex"
@@ -15,6 +18,21 @@ func RenderHTMLTag(selection *goquery.Selection) string {
 	buf := bytes.NewBuffer([]byte{})
 	html.Render(buf, node)
 	return buf.String()
+}
+
+func ReadFromURI(uri string) ([]byte, error) {
+	res, err := http.Get(uri)
+	if err != nil {
+		Log.E(err.Error())
+		return nil, errors.Wrap(err, "Cannot get response")
+	}
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		Log.E(err.Error())
+		return nil, errors.Wrap(err, "Cannot read from stream reader")
+	}
+	return body, nil
 }
 
 func Hash(input []byte) string {

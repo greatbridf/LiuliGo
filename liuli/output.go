@@ -2,6 +2,7 @@ package liuli
 
 import (
 	"errors"
+	"fmt"
 	"os"
 
 	logger "github.com/greatbridf/go-logger"
@@ -9,7 +10,11 @@ import (
 
 var (
 	filename string = "LiuliGo.log"
-	log      *logger.Logger
+	Log      *logger.Logger
+)
+
+const (
+	ERR_CANNOT_GOQUERY = "Cannot get goquery documents"
 )
 
 func init() {
@@ -17,14 +22,16 @@ func init() {
 	if err != nil {
 		panic(errors.New("Cannot open log file"))
 	}
-	log = logger.New(file, "LiuliGo")
+	Log = logger.New(file, "LiuliGo")
 }
 
 // PrintError Print error message to stdout
 func PrintError(msg string) {
-	log.E(msg)
+	Log.E(msg)
+	fmt.Printf("Content-Type: text/plain; charset=utf-8\n\n")
+	fmt.Println(msg)
 }
 
 func PrintDebug(msg string) {
-	log.D(msg)
+	Log.D(msg)
 }

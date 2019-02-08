@@ -19,9 +19,13 @@ func main() {
 		if page == "" {
 			page = "1"
 		}
-		articles := liuli.GetArticles(page)
-		fmt.Printf("Content-Type: application/json; charset=utf-8\n\n")
-		fmt.Println(liuli.GetArticlesJSON(articles))
+		articles, err := liuli.GetArticles(page)
+		if err != nil {
+			liuli.PrintError(err.Error())
+		} else {
+			fmt.Printf("Content-Type: application/json; charset=utf-8\n\n")
+			fmt.Println(liuli.GetArticlesJSON(articles))
+		}
 		break
 	case "content":
 		id := query.Get("id")
@@ -29,13 +33,13 @@ func main() {
 			liuli.PrintError("No content id given")
 			return
 		}
-		content := liuli.GetContent(id)
-		if content == "" {
-			liuli.PrintError("Unable to get content")
-			return
+		content, err := liuli.GetContent(id)
+		if err != nil {
+			liuli.PrintError(err.Error())
+		} else {
+			fmt.Printf("Content-Type: text/html; charset=utf-8\n\n")
+			fmt.Println(content)
 		}
-		fmt.Printf("Content-Type: text/html; charset=utf-8\n\n")
-		fmt.Println(content)
 		break
 	case "magnet":
 		id := query.Get("id")
@@ -44,9 +48,6 @@ func main() {
 			return
 		}
 		magnet := liuli.GetMagnet(id)
-		if len(magnet) == 0 {
-			liuli.PrintError("No magnet link found in " + id)
-		}
 		fmt.Printf("Content-Type: text/plain; charset=utf-8\n\n")
 		for i := 0; i < len(magnet); i++ {
 			fmt.Println(magnet[i])
@@ -54,24 +55,16 @@ func main() {
 		break
 	case "resource":
 		hash := query.Get("hash")
-		cache := liuli.Cache{}
-		cache.Init("caches/index")
-		defer cache.Close()
-		if cache.HasHash(hash) {
-			id := cache.GetIDByHash(hash)
-			data, ok := cache.Get(id)
-			if !ok {
-				liuli.PrintError("Cannot get cache!")
-			}
+		data, err := liuli.GetResource(hash)
+		if err != nil {
+			liuli.PrintError(err.Error())
+		} else {
 			fmt.Println("Content-Length: " + fmt.Sprintf("%d", len(data)))
 			fmt.Printf("Content-Type: image/jpeg\n\n")
 			err := ioutil.WriteFile("/dev/stdout", data, 0666)
 			if err != nil {
-				liuli.PrintError("Cannot write resource to stdout")
-				panic(err)
+				liuli.Log.E(err.Error())
 			}
-		} else {
-			liuli.PrintError("No resource id found")
 		}
 		break
 	default:
