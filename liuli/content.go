@@ -28,7 +28,7 @@ func GetContent(id string) string {
 	style := GetStyle(doc)
 	data := style + content
 
-	cache.Add(id, Hash(data), []byte(data))
+	cache.Add(id, []byte(data))
 
 	return data
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/url"
 	"os"
 
@@ -53,7 +54,25 @@ func main() {
 		break
 	case "resource":
 		hash := query.Get("hash")
-		// TODO
+		cache := liuli.Cache{}
+		cache.Init("caches/index")
+		defer cache.Close()
+		if cache.HasHash(hash) {
+			id := cache.GetIDByHash(hash)
+			data, ok := cache.Get(id)
+			if !ok {
+				liuli.PrintError("Cannot get cache!")
+			}
+			fmt.Println("Content-Length: " + fmt.Sprintf("%d", len(data)))
+			fmt.Printf("Content-Type: image/jpeg\n\n")
+			err := ioutil.WriteFile("/dev/stdout", data, 0666)
+			if err != nil {
+				liuli.PrintError("Cannot write resource to stdout")
+				panic(err)
+			}
+		} else {
+			liuli.PrintError("No resource id found")
+		}
 		break
 	default:
 		liuli.PrintError("Invalid query method")

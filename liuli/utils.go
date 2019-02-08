@@ -3,10 +3,10 @@ package liuli
 import (
 	"bytes"
 
+	"crypto/md5"
+	"encoding/hex"
 	"github.com/PuerkitoBio/goquery"
 	"golang.org/x/net/html"
-    "crypto/md5"
-    "encoding/hex"
 )
 
 // RenderHTMLTag convert goquery.Selection to html string
@@ -17,10 +17,9 @@ func RenderHTMLTag(selection *goquery.Selection) string {
 	return buf.String()
 }
 
-func Hash(input string) string {
-    m := md5.New()
-    m.Write([]byte(input))
-    output := hex.EncodeToString(m.Sum(nil))
-    return output
+func Hash(input []byte) string {
+	m := md5.New()
+	m.Write(input)
+	output := hex.EncodeToString(m.Sum(nil))
+	return output
 }
-

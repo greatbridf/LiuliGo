@@ -9,14 +9,15 @@ import (
 )
 
 type Cache struct {
-	index     *os.File
-	valid     bool
-	list      map[string]string
-	hash_list []string
+	index *os.File
+	valid bool
+	list  map[string]string
+	rev   map[string]string
 }
 
 func (c *Cache) Init(indexPath string) {
 	c.list = make(map[string]string)
+	c.rev = make(map[string]string)
 	tmp_file, err := os.OpenFile(indexPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		PrintError("Cannot open cache file!")
@@ -30,13 +31,14 @@ func (c *Cache) Init(indexPath string) {
 		}
 		id_and_hash := strings.Split(string(line[:]), " ")
 		c.list[id_and_hash[0]] = id_and_hash[1]
-		c.hash_list = append(c.hash_list, id_and_hash[1])
+		c.rev[id_and_hash[1]] = id_and_hash[0]
 	}
 }
 
-func (c *Cache) Add(id string, hash string, data []byte) {
+func (c *Cache) Add(id string, data []byte) {
+	hash := Hash(data)
 	c.list[id] = hash
-	c.hash_list = append(c.hash_list, hash)
+	c.rev[hash] = id
 	c.index.WriteString(id + " " + hash + "\n")
 	err := ioutil.WriteFile("caches/"+hash, data, 0666)
 	if err != nil {
@@ -46,11 +48,7 @@ func (c *Cache) Add(id string, hash string, data []byte) {
 }
 
 func (c Cache) Get(id string) ([]byte, bool) {
-	hash, exists := c.list[id]
-	if !exists {
-		return nil, false
-	}
-	data, err := ioutil.ReadFile("caches/" + hash)
+	data, err := ioutil.ReadFile("caches/" + c.GetHash(id))
 	if err != nil {
 		PrintError("Cannot read from cache!")
 		return nil, false
@@ -65,8 +63,18 @@ func (c Cache) Find(id string) bool {
 }
 
 func (c Cache) GetHash(id string) string {
-	hash, _ := c.list[id]
+	hash := c.list[id]
 	return hash
+}
+
+func (c Cache) GetIDByHash(hash string) string {
+	id := c.rev[hash]
+	return id
+}
+
+func (c Cache) HasHash(hash string) bool {
+	_, exists := c.rev[hash]
+	return exists
 }
 
 func (c *Cache) Close() {

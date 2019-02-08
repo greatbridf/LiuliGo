@@ -2,6 +2,7 @@ package liuli
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/PuerkitoBio/goquery"
@@ -53,12 +54,21 @@ func GetArticleArray(doc *goquery.Document) []Article {
 		var tmp Article
 		tmp.Description = selection.Find(".entry-content").Text()
 		img_link, _ := selection.Find("img").Attr("src")
-		if cache.Find(img_link) {
-			PrintDebug("Get " + img_link + " from cache")
-			tmp.Img = "http://144.202.106.87/interface/LiuliGo.cgi?req=resource&hash=" + cache.GetHash(img_link)
-		} else {
-			// TODO save image to cache
+		if !cache.Find(img_link) {
+			res, err := http.Get(img_link)
+			if err != nil {
+				PrintError(err.Error())
+				panic(err)
+			}
+			body, err := ioutil.ReadAll(res.Body)
+			if err != nil {
+				PrintError(err.Error())
+				panic(err)
+			}
+			cache.Add(img_link, body)
+			res.Body.Close()
 		}
+		tmp.Img = "http://144.202.106.87/interface/LiuliGo.cgi?req=resource&hash=" + cache.GetHash(img_link)
 		tmp.Link, _ = selection.Find(".more-link").Attr("href")
 		tmp.Title = selection.Find(".entry-title").Text()
 		if tmp.Title != "" {
