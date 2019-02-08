@@ -1,5 +1,10 @@
 # Build files
 debug
 *.cgi
+*.log
+# Test files
+caches/
 # Vim temp files
 *.swp
+# macOS stuff
+.DS_Store
