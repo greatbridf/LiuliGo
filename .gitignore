@@ -1,3 +1,5 @@
 # Build files
 debug
 *.cgi
+# Vim temp files
+*.swp
