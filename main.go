@@ -47,9 +47,9 @@ func main() {
 			liuli.PrintError("No magnet link found in " + id)
 		}
 		fmt.Printf("Content-Type: text/plain; charset=utf-8\n\n")
-    for i := 0; i < len(magnet); i++ {
-      fmt.Println(magnet[i])
-    }
+		for i := 0; i < len(magnet); i++ {
+			fmt.Println(magnet[i])
+		}
 		break
 	default:
 		liuli.PrintError("Invalid query method")

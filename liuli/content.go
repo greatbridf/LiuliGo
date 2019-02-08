@@ -7,12 +7,13 @@ import (
 // GetContent get page by link
 // Both content and styles
 func GetContent(id string) string {
-    cache := Cache{}
-    cache.Init("caches/index")
-    if (cache.Find(id)) {
-        PrintDebug("Get " + id + " from cache!")
-        return cache.Get(id)
-    }
+	cache := Cache{}
+	cache.Init("caches/index")
+	defer cache.Close()
+	cachedata, fin := cache.Get(id)
+	if fin {
+		return string(cachedata)
+	}
 
 	link := "https://www.hacg.me/wp/" + id + ".html"
 	doc, err := goquery.NewDocument(link)
@@ -25,11 +26,9 @@ func GetContent(id string) string {
 		panic("No content")
 	}
 	style := GetStyle(doc)
-    data := style + content
+	data := style + content
 
-    PrintDebug("Add " + id + " to cache")
-    cache.Add(id, Hash(data), data)
-    cache.Close()
+	cache.Add(id, Hash(data), []byte(data))
 
 	return data
 }
