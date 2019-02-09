@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net/url"
 	"os"
 
@@ -66,7 +65,7 @@ func main() {
 		} else {
 			fmt.Println("Content-Length: " + fmt.Sprintf("%d", len(data)))
 			fmt.Printf("Content-Type: image/jpeg\n\n")
-			err := ioutil.WriteFile("/dev/stdout", data, 0666)
+			_, err := os.Stdout.Write(data)
 			if err != nil {
 				liuli.Log.E(err.Error())
 			}
