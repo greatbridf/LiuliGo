@@ -22,10 +22,15 @@ func main() {
 		articles, err := liuli.GetArticles(page)
 		if err != nil {
 			liuli.PrintError(err.Error())
-		} else {
-			fmt.Printf("Content-Type: application/json; charset=utf-8\n\n")
-			fmt.Println(liuli.GetArticlesJSON(articles))
+			return
 		}
+		json, err := liuli.GetArticlesJSON(articles)
+		if err != nil {
+			liuli.PrintError(err.Error())
+			return
+		}
+		fmt.Printf("Content-Type: application/json; charset=utf-8\n\n")
+		fmt.Println(json)
 		break
 	case "content":
 		id := query.Get("id")
