@@ -9,11 +9,11 @@ import (
 // GetMagnet get magnet link from content
 // Returns array
 func GetMagnet(id string) []string {
-    link := "http://144.202.106.87/interface/LiuliGo.cgi?req=content&id=" + id
-    doc, _ := goquery.NewDocument(link)
-    doc.Find("a").Remove()
-    doc.Find("img").Remove()
-    content, _ := doc.Html()
+	link := "http://207.148.126.92/interface/LiuliGo.cgi?req=content&id=" + id
+	doc, _ := goquery.NewDocument(link)
+	doc.Find("a").Remove()
+	doc.Find("img").Remove()
+	content, _ := doc.Html()
 	exp := regexp.MustCompile("[a-zA-Z0-9]{40}")
 	magnet := exp.FindAllString(content, -1)
 	for i := 0; i < len(magnet); i++ {

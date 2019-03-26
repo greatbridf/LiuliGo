@@ -77,7 +77,7 @@ func GetArticleArray(doc *goquery.Document) ([]Article, error) {
 				return
 			}
 		}
-		tmp.Img = "http://144.202.106.87/interface/LiuliGo.cgi?req=resource&hash=" + cache.GetHash(img_link)
+		tmp.Img = "http://207.148.126.92/interface/LiuliGo.cgi?req=resource&hash=" + cache.GetHash(img_link)
 		articles = append(articles, tmp)
 	})
 	if ERR != nil {
