@@ -4,11 +4,11 @@
 ```shell
 make os=[OS] arch=[ARCH]
 ```
-OS:
+### OS
 - Windows: `windows`
 - Linux: `linux`
 - macOS: `darwin`
-ARCH:
+### ARCH
 - x86: `386`
 - x64: `amd64`
 - ARM: `arm`
