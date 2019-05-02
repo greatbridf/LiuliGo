@@ -1,16 +1,10 @@
 package liuli
 
 import (
-	"encoding/json"
 	"github.com/pkg/errors"
 
 	"github.com/PuerkitoBio/goquery"
 )
-
-// Articles container of Article
-type Articles struct {
-	Articles []Article `json:"articles"`
-}
 
 // Article single liuli article
 type Article struct {
@@ -21,7 +15,7 @@ type Article struct {
 }
 
 // GetArticles get articles from hacg.me
-func GetArticles(page string) (*Articles, error) {
+func GetArticles(page string) ([]Article, error) {
 	uri := "https://www.hacg.me/wp/"
 	if page != "1" {
 		uri = "https://www.hacg.me/wp/page/" + page
@@ -31,13 +25,10 @@ func GetArticles(page string) (*Articles, error) {
 		Log.E(err.Error())
 		return nil, errors.Wrap(err, ERR_CANNOT_GOQUERY)
 	}
-	tmp, err := GetArticleArray(doc)
+	articles, err := GetArticleArray(doc)
 	if err != nil {
 		Log.E(err.Error())
 		return nil, errors.Wrap(err, "Cannot get article array")
-	}
-	articles := &Articles{
-		Articles: tmp,
 	}
 	return articles, nil
 }
@@ -85,14 +76,4 @@ func GetArticleArray(doc *goquery.Document) ([]Article, error) {
 		return nil, ERR
 	}
 	return articles, nil
-}
-
-// GetArticlesJSON convert Articles Objecet into json string
-func GetArticlesJSON(articles *Articles) (string, error) {
-	jsonByteArray, err := json.Marshal(articles)
-	if err != nil {
-		Log.E(err.Error())
-		return "", errors.Wrap(err, "Cannot stringify JSON")
-	}
-	return string(jsonByteArray), nil
 }

@@ -6,6 +6,17 @@ import (
 	logger "github.com/greatbridf/go-logger"
 )
 
+type LiuliResp struct {
+	Code int       `json:"code"`
+	Msg  string    `json:"msg"`
+	Data LiuliData `json:"data"`
+}
+
+type LiuliData struct {
+	Articles []Article `json:"articles,omitempty"`
+	Magnets  []string  `json:"magnets,omitempty"`
+}
+
 var (
 	filename string = "LiuliGo.log"
 	Log      *logger.Logger

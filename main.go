@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"os"
@@ -23,7 +24,15 @@ func main() {
 			liuli.PrintError(err.Error())
 			return
 		}
-		json, err := liuli.GetArticlesJSON(articles)
+		resp := liuli.LiuliResp{
+			200,
+			"OK",
+			liuli.LiuliData{
+				articles,
+				nil,
+			},
+		}
+		json, err := json.Marshal(resp)
 		if err != nil {
 			liuli.PrintError(err.Error())
 			return
