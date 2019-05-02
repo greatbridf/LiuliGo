@@ -38,7 +38,7 @@ func main() {
 			return
 		}
 		fmt.Printf("Content-Type: application/json; charset=utf-8\n\n")
-		fmt.Println(json)
+		fmt.Println(string(json))
 		break
 	case "content":
 		id := query.Get("id")
