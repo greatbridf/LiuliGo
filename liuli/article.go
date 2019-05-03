@@ -14,8 +14,10 @@ type Article struct {
 	Title       string `json:"title"`
 }
 
+type Articles []Article
+
 // GetArticles get articles from hacg.me
-func GetArticles(page string) ([]Article, error) {
+func GetArticles(page string) (Articles, error) {
 	uri := "https://www.hacg.me/wp/"
 	if page != "1" {
 		uri = "https://www.hacg.me/wp/page/" + page
@@ -34,8 +36,8 @@ func GetArticles(page string) ([]Article, error) {
 }
 
 // GetArticleArray get Article Objects from goquery document
-func GetArticleArray(doc *goquery.Document) ([]Article, error) {
-	var articles []Article
+func GetArticleArray(doc *goquery.Document) (Articles, error) {
+	var articles Articles
 	var ERR error
 	cache := Cache{}
 	err := cache.Init()

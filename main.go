@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/url"
 	"os"
@@ -24,21 +23,11 @@ func main() {
 			liuli.PrintError(err.Error())
 			return
 		}
-		resp := liuli.LiuliResp{
-			200,
-			"OK",
-			liuli.LiuliData{
-				articles,
-				nil,
-			},
-		}
-		json, err := json.Marshal(resp)
+		err = articles.Print()
 		if err != nil {
 			liuli.PrintError(err.Error())
 			return
 		}
-		fmt.Printf("Content-Type: application/json; charset=utf-8\n\n")
-		fmt.Println(string(json))
 		break
 	case "content":
 		id := query.Get("id")

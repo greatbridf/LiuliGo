@@ -1,10 +1,14 @@
 package liuli
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/pkg/errors"
 
 	logger "github.com/greatbridf/go-logger"
 )
+
+type Strings []string
 
 type LiuliResp struct {
 	Code int       `json:"code"`
@@ -13,8 +17,8 @@ type LiuliResp struct {
 }
 
 type LiuliData struct {
-	Articles []Article `json:"articles,omitempty"`
-	Magnets  []string  `json:"magnets,omitempty"`
+	Articles Articles `json:"articles,omitempty"`
+	Magnets  Strings  `json:"magnets,omitempty"`
 }
 
 var (
@@ -33,8 +37,65 @@ func init() {
 // PrintError Print error message to stdout
 func PrintError(msg string) {
 	Log.E(msg)
-	fmt.Printf("Content-Type: text/plain; charset=utf-8\n\n")
-	fmt.Println(msg)
+	fmt.Printf("Content-Type: application/json; charset=utf-8\n\n")
+	resp := LiuliResp{
+		400,
+		msg,
+		LiuliData{},
+	}
+	json, err := respStringify(resp)
+	if err != nil {
+		Log.E(err.Error())
+		return
+	}
+	fmt.Println(json)
+}
+
+func (data Articles) Print() error {
+	resp := LiuliResp{
+		200,
+		"OK",
+		LiuliData{
+			data,
+			nil,
+		},
+	}
+	json, err := respStringify(resp)
+	if err != nil {
+		Log.E(err.Error())
+		return errors.Wrap(err, "cannot print data")
+	}
+	fmt.Printf("Content-Type: application/json; charset=utf-8\n\n")
+	fmt.Println(json)
+	return nil
+}
+
+func (data Strings) Print() error {
+	resp := LiuliResp{
+		200,
+		"OK",
+		LiuliData{
+			nil,
+			data,
+		},
+	}
+	json, err := respStringify(resp)
+	if err != nil {
+		Log.E(err.Error())
+		return errors.Wrap(err, "cannot print data")
+	}
+	fmt.Printf("Content-Type: application/json; charset=utf-8\n\n")
+	fmt.Println(json)
+	return nil
+}
+
+func respStringify(resp LiuliResp) (string, error) {
+	out, err := json.Marshal(resp)
+	if err != nil {
+		Log.E(err.Error())
+		return "", errors.Wrap(err, "cannot stringify json")
+	}
+	return string(out), nil
 }
 
 func PrintDebug(msg string) {
