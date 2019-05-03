@@ -8,8 +8,6 @@ import (
 	logger "github.com/greatbridf/go-logger"
 )
 
-type Strings []string
-
 type LiuliResp struct {
 	Code int        `json:"code"`
 	Msg  string     `json:"msg"`
@@ -18,7 +16,7 @@ type LiuliResp struct {
 
 type LiuliData struct {
 	Articles Articles `json:"articles,omitempty"`
-	Magnets  Strings  `json:"magnets,omitempty"`
+	Magnets  Magnets  `json:"magnets,omitempty"`
 }
 
 var (
@@ -70,7 +68,7 @@ func (data Articles) Print() error {
 	return nil
 }
 
-func (data Strings) Print() error {
+func (data Magnets) Print() error {
 	resp := LiuliResp{
 		200,
 		"OK",

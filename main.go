@@ -50,9 +50,9 @@ func main() {
 			return
 		}
 		magnet := liuli.GetMagnet(id)
-		fmt.Printf("Content-Type: text/plain; charset=utf-8\n\n")
-		for i := 0; i < len(magnet); i++ {
-			fmt.Println(magnet[i])
+		err := magnet.Print()
+		if err != nil {
+			liuli.PrintError(err.Error())
 		}
 		break
 	case "resource":
