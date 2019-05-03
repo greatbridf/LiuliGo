@@ -49,8 +49,12 @@ func main() {
 			liuli.PrintError("No content id given")
 			return
 		}
-		magnet := liuli.GetMagnet(id)
-		err := magnet.Print()
+		magnet, err := liuli.GetMagnet(id)
+		if err != nil {
+			liuli.PrintError(err.Error())
+			return
+		}
+		err = magnet.Print()
 		if err != nil {
 			liuli.PrintError(err.Error())
 		}
