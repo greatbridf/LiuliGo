@@ -11,7 +11,7 @@ LiuliGo.cgi : $(source)
   
 .PHONY : deploy
 deploy : LiuliGo.cgi
-	scp LiuliGo.cgi SS:html_root/interface/LiuliGo.cgi
+	tar czf - LiuliGo.cgi | ssh SS "tar xzf - && mv LiuliGo.cgi /var/www/interface/test/"
 
 .PHONY : test
 test : LiuliGo.cgi

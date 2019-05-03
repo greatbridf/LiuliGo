@@ -23,13 +23,11 @@ func main() {
 			liuli.PrintError(err.Error())
 			return
 		}
-		json, err := liuli.GetArticlesJSON(articles)
+		err = articles.Print()
 		if err != nil {
 			liuli.PrintError(err.Error())
 			return
 		}
-		fmt.Printf("Content-Type: application/json; charset=utf-8\n\n")
-		fmt.Println(json)
 		break
 	case "content":
 		id := query.Get("id")
@@ -51,10 +49,14 @@ func main() {
 			liuli.PrintError("No content id given")
 			return
 		}
-		magnet := liuli.GetMagnet(id)
-		fmt.Printf("Content-Type: text/plain; charset=utf-8\n\n")
-		for i := 0; i < len(magnet); i++ {
-			fmt.Println(magnet[i])
+		magnet, err := liuli.GetMagnet(id)
+		if err != nil {
+			liuli.PrintError(err.Error())
+			return
+		}
+		err = magnet.Print()
+		if err != nil {
+			liuli.PrintError(err.Error())
 		}
 		break
 	case "resource":
