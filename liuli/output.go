@@ -11,9 +11,9 @@ import (
 type Strings []string
 
 type LiuliResp struct {
-	Code int       `json:"code"`
-	Msg  string    `json:"msg"`
-	Data LiuliData `json:"data"`
+	Code int        `json:"code"`
+	Msg  string     `json:"msg"`
+	Data *LiuliData `json:"data,omitempty"`
 }
 
 type LiuliData struct {
@@ -41,7 +41,7 @@ func PrintError(msg string) {
 	resp := LiuliResp{
 		400,
 		msg,
-		LiuliData{},
+		nil,
 	}
 	json, err := respStringify(resp)
 	if err != nil {
@@ -55,7 +55,7 @@ func (data Articles) Print() error {
 	resp := LiuliResp{
 		200,
 		"OK",
-		LiuliData{
+		&LiuliData{
 			data,
 			nil,
 		},
@@ -74,7 +74,7 @@ func (data Strings) Print() error {
 	resp := LiuliResp{
 		200,
 		"OK",
-		LiuliData{
+		&LiuliData{
 			nil,
 			data,
 		},
