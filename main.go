@@ -59,20 +59,6 @@ func main() {
 			liuli.PrintError(err.Error())
 		}
 		break
-	case "resource":
-		hash := query.Get("hash")
-		data, err := liuli.GetResource(hash)
-		if err != nil {
-			liuli.PrintError(err.Error())
-		} else {
-			fmt.Println("Content-Length: " + fmt.Sprintf("%d", len(data)))
-			fmt.Printf("Content-Type: image/jpeg\n\n")
-			_, err := os.Stdout.Write(data)
-			if err != nil {
-				liuli.Log.E(err.Error())
-			}
-		}
-		break
 	default:
 		liuli.PrintError("Invalid query method")
 		break
