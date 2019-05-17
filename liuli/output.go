@@ -49,7 +49,7 @@ func PrintError(msg string) {
 	fmt.Println(json)
 }
 
-func (data Articles) Print() error {
+func (data Articles) Print() {
 	resp := LiuliResp{
 		200,
 		"OK",
@@ -60,15 +60,14 @@ func (data Articles) Print() error {
 	}
 	json, err := respStringify(resp)
 	if err != nil {
-		Log.E(err.Error())
-		return errors.Wrap(err, "cannot print data")
+		PrintError(err.Error())
+		return
 	}
 	fmt.Printf("Content-Type: application/json; charset=utf-8\n\n")
 	fmt.Println(json)
-	return nil
 }
 
-func (data Magnets) Print() error {
+func (data Magnets) Print() {
 	resp := LiuliResp{
 		200,
 		"OK",
@@ -79,12 +78,26 @@ func (data Magnets) Print() error {
 	}
 	json, err := respStringify(resp)
 	if err != nil {
-		Log.E(err.Error())
-		return errors.Wrap(err, "cannot print data")
+		PrintError(err.Error())
+		return
 	}
 	fmt.Printf("Content-Type: application/json; charset=utf-8\n\n")
 	fmt.Println(json)
-	return nil
+}
+
+func (data DeleteResult) Print() {
+	resp := LiuliResp{
+		data.result,
+		data.msg,
+		nil,
+	}
+	json, err := respStringify(resp)
+	if err != nil {
+		PrintError(err.Error())
+		return
+	}
+	fmt.Printf("Content-Type: application/json; charset=utf-8\n\n")
+	fmt.Println(json)
 }
 
 func respStringify(resp LiuliResp) (string, error) {
