@@ -1,17 +1,16 @@
 package liuli
 
 import (
-	"bufio"
+	"database/sql"
 	"github.com/pkg/errors"
-	"io"
 	"io/ioutil"
 	"os"
-	"strings"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type Cache struct {
-	index *os.File
-	valid bool
+	index *sql.DB
 	list  map[string]string
 	rev   map[string]string
 }
@@ -19,20 +18,46 @@ type Cache struct {
 func (c *Cache) Init() error {
 	c.list = make(map[string]string)
 	c.rev = make(map[string]string)
-	tmp_file, err := os.OpenFile("caches/index", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	_, err := os.Stat("caches")
 	if err != nil {
-		return errors.WithStack(err)
-	}
-	c.index = tmp_file
-	br := bufio.NewReader(c.index)
-	for {
-		line, _, flag := br.ReadLine()
-		if flag == io.EOF {
-			break
+		if os.IsNotExist(err) {
+			err = os.Mkdir("caches", 0775)
+			if err != nil {
+				return HE(err)
+			}
+		} else {
+			return HE(err)
 		}
-		id_and_hash := strings.Split(string(line[:]), " ")
-		c.list[id_and_hash[0]] = id_and_hash[1]
-		c.rev[id_and_hash[1]] = id_and_hash[0]
+	}
+	index, err := sql.Open("sqlite3", "index.db")
+	c.index = index
+	if err != nil {
+		return HE(err)
+	}
+	// Test if the database exists
+	rows, err := c.index.Query("SELECT hash,name FROM `index`")
+	if err != nil {
+		create, err := c.index.Prepare("CREATE TABLE `index`(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, hash TEXT)")
+		if err != nil {
+			return HE(err)
+		}
+		_, err = create.Exec()
+		if err != nil {
+			return HE(err)
+		}
+		return nil
+	}
+	defer rows.Close()
+	for rows.Next() {
+		// Read to memory
+		var hash string
+		var name string
+		err := rows.Scan(&hash, &name)
+		if err != nil {
+			return HE(err)
+		}
+		c.list[name] = hash
+		c.rev[hash] = name
 	}
 	return nil
 }
@@ -41,10 +66,17 @@ func (c *Cache) Add(id string, data []byte) error {
 	hash := Hash(data)
 	c.list[id] = hash
 	c.rev[hash] = id
-	c.index.WriteString(id + " " + hash + "\n")
 	err := ioutil.WriteFile("caches/"+hash, data, 0666)
 	if err != nil {
-		return errors.Wrap(err, "Cannot write cache file")
+		return HEM(err, "Cannot write cache file")
+	}
+	stmt, err := c.index.Prepare("INSERT INTO `index`(name, hash) VALUES(?, ?)")
+	if err != nil {
+		return HE(err)
+	}
+	_, err = stmt.Exec(id, hash)
+	if err != nil {
+		return HE(err)
 	}
 	Log.D("Add " + id + " to cache!")
 	return nil
@@ -53,8 +85,7 @@ func (c *Cache) Add(id string, data []byte) error {
 func (c Cache) Get(id string) ([]byte, error) {
 	data, err := ioutil.ReadFile("caches/" + c.GetHash(id))
 	if err != nil {
-		Log.D(err.Error())
-		return nil, errors.WithStack(err)
+		return nil, HE(errors.WithStack(err))
 	}
 	PrintDebug("Get " + id + " from cache")
 	return data, nil
@@ -63,6 +94,23 @@ func (c Cache) Get(id string) ([]byte, error) {
 func (c Cache) Find(id string) bool {
 	_, exists := c.list[id]
 	return exists
+}
+
+func (c *Cache) Remove(id string) error {
+	if !c.Find(id) {
+		return errors.New("Resource does not exist")
+	}
+	delete(c.rev, c.GetHash(id))
+	delete(c.list, id)
+	stmt, err := c.index.Prepare("DELETE FROM `index` WHERE name=?")
+	if err != nil {
+		return HE(err)
+	}
+	_, err = stmt.Exec(id)
+	if err != nil {
+		return HE(err)
+	}
+	return nil
 }
 
 func (c Cache) GetHash(id string) string {

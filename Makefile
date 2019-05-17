@@ -1,8 +1,7 @@
 source = main.go liuli/*.go
 os = linux
 arch = amd64
-buildargs = CGO_ENABLED=0
-buildargs += GOOS=$(os)
+buildargs = GOOS=$(os)
 buildargs += GOARCH=$(arch)
 
 LiuliGo.cgi : $(source)
@@ -22,3 +21,4 @@ clean :
 	-rm *.cgi
 	-rm -rf caches/
 	-rm *.log
+	-rm index.db
