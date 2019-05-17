@@ -4,21 +4,35 @@ import (
 	"github.com/pkg/errors"
 )
 
-// GetResource Get resource from cache or internet by hash
-func GetResource(hash string) ([]byte, error) {
+type DeleteResult struct {
+	result int
+	msg    string
+}
+
+func DeleteResource(id string) (*DeleteResult, error) {
 	cache := Cache{}
 	err := cache.Init()
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
 	defer cache.Close()
-	if cache.HasHash(hash) {
-		id := cache.GetIDByHash(hash)
-		data, err := cache.Get(id)
-		if err != nil {
-			return nil, errors.WithStack(err)
+	if !cache.Find(id) {
+		result := DeleteResult{
+			404,
+			"Not Found",
 		}
-		return data, nil
+		Log.D("Queried to delete " + id + " but found nothing")
+		return &result, nil
 	}
-	return nil, errors.New("No resource found according to hash")
+	hash := cache.GetHash(id)
+	err = cache.Remove(id)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	Log.D("Deleted " + id + " (was " + hash + ")")
+	result := DeleteResult{
+		200,
+		"Deleted",
+	}
+	return &result, nil
 }

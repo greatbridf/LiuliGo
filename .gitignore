@@ -4,6 +4,7 @@ debug
 *.log
 # Test files
 caches/
+index.db
 # Vim temp files
 *.swp
 # macOS stuff

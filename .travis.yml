@@ -3,7 +3,7 @@ install:
   - go get -d -v ./...
 
 script:
-  - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o LiuliGo.cgi
+  - GOOS=linux GOARCH=amd64 go build -o LiuliGo.cgi
 
 deploy:
   provider: releases

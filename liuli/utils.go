@@ -35,6 +35,17 @@ func ReadFromURI(uri string) ([]byte, error) {
 	return body, nil
 }
 
+func HE(err error) error {
+	Log.E(err.Error())
+	return err
+}
+
+func HEM(err error, msg string) error {
+	errors.Wrap(err, msg)
+	Log.E(err.Error())
+	return err
+}
+
 func Hash(input []byte) string {
 	m := md5.New()
 	m.Write(input)

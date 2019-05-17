@@ -23,11 +23,7 @@ func main() {
 			liuli.PrintError(err.Error())
 			return
 		}
-		err = articles.Print()
-		if err != nil {
-			liuli.PrintError(err.Error())
-			return
-		}
+		articles.Print()
 		break
 	case "content":
 		id := query.Get("id")
@@ -54,24 +50,20 @@ func main() {
 			liuli.PrintError(err.Error())
 			return
 		}
-		err = magnet.Print()
-		if err != nil {
-			liuli.PrintError(err.Error())
-		}
+		magnet.Print()
 		break
-	case "resource":
-		hash := query.Get("hash")
-		data, err := liuli.GetResource(hash)
+	case "delete":
+		id := query.Get("id")
+		if id == "" {
+			liuli.PrintError("No content id given")
+			return
+		}
+		result, err := liuli.DeleteResource(id)
 		if err != nil {
 			liuli.PrintError(err.Error())
-		} else {
-			fmt.Println("Content-Length: " + fmt.Sprintf("%d", len(data)))
-			fmt.Printf("Content-Type: image/jpeg\n\n")
-			_, err := os.Stdout.Write(data)
-			if err != nil {
-				liuli.Log.E(err.Error())
-			}
+			return
 		}
+		result.Print()
 		break
 	default:
 		liuli.PrintError("Invalid query method")
