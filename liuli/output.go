@@ -2,8 +2,7 @@ package liuli
 
 import (
 	"encoding/json"
-	"fmt"
-	"github.com/pkg/errors"
+	"io"
 
 	logger "github.com/greatbridf/go-logger"
 )
@@ -33,79 +32,20 @@ func init() {
 }
 
 // PrintError Print error message to stdout
-func PrintError(e error) {
+func PrintError(w io.Writer, e error) {
 	Log.Err(e)
-	fmt.Printf("Content-Type: application/json; charset=utf-8\n\n")
 	resp := LiuliResp{
 		400,
 		e.Error(),
 		nil,
 	}
-	json, err := respStringify(resp)
-	if err != nil {
-		Log.Err(err)
-		return
-	}
-	fmt.Println(json)
+	json, _ := json.Marshal(resp)
+	w.Write(json)
 }
 
-func (data Articles) Print() {
-	resp := LiuliResp{
-		200,
-		"OK",
-		&LiuliData{
-			data,
-			nil,
-		},
-	}
-	json, err := respStringify(resp)
-	if err != nil {
-		PrintError(err)
-		return
-	}
-	fmt.Printf("Content-Type: application/json; charset=utf-8\n\n")
-	fmt.Println(json)
-}
-
-func (data Magnets) Print() {
-	resp := LiuliResp{
-		200,
-		"OK",
-		&LiuliData{
-			nil,
-			data,
-		},
-	}
-	json, err := respStringify(resp)
-	if err != nil {
-		PrintError(err)
-		return
-	}
-	fmt.Printf("Content-Type: application/json; charset=utf-8\n\n")
-	fmt.Println(json)
-}
-
-func (data DeleteResult) Print() {
-	resp := LiuliResp{
-		data.result,
-		data.msg,
-		nil,
-	}
-	json, err := respStringify(resp)
-	if err != nil {
-		PrintError(err)
-		return
-	}
-	fmt.Printf("Content-Type: application/json; charset=utf-8\n\n")
-	fmt.Println(json)
-}
-
-func respStringify(resp LiuliResp) (string, error) {
-	out, err := json.Marshal(resp)
-	if err != nil {
-		return "", errors.Wrap(err, "cannot stringify json")
-	}
-	return string(out), nil
+func (resp LiuliResp) Print(w io.Writer) {
+	json, _ := json.Marshal(resp)
+	w.Write(json)
 }
 
 func PrintDebug(msg string) {
