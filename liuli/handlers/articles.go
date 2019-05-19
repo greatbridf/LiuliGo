@@ -4,13 +4,13 @@ import (
 	"net/http"
 
 	"github.com/greatbridf/LiuliGo/liuli"
-	"github.com/pkg/errors"
 )
 
 func HandleArticles(w http.ResponseWriter, req *http.Request) {
 	req.ParseForm()
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	tmp := req.Form["id"]
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	tmp := req.Form["page"]
 	page := "1"
 	if len(tmp) != 0 {
 		page = tmp[0]
