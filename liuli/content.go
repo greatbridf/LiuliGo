@@ -25,13 +25,11 @@ func GetContent(id string) (string, error) {
 		link := "https://www.hacg.me/wp/" + id + ".html"
 		doc, err := goquery.NewDocument(link)
 		if err != nil {
-			Log.E(err.Error())
 			return "", errors.Wrap(err, ERR_CANNOT_GOQUERY)
 		}
 
 		content, err := GetContentNoStyle(doc)
 		if err != nil {
-			Log.E(err.Error())
 			return "", errors.WithStack(err)
 		}
 
@@ -40,7 +38,6 @@ func GetContent(id string) (string, error) {
 
 		err = cache.Add(id, []byte(data))
 		if err != nil {
-			Log.E(err.Error())
 			return "", errors.WithStack(err)
 		}
 		return data, nil
@@ -64,8 +61,7 @@ func GetContentNoStyle(doc *goquery.Document) (string, error) {
 		content += tmp
 	})
 	if ERR != nil {
-		Log.E(ERR.Error())
-		return "", ERR
+		return "", errors.WithStack(ERR)
 	}
 	return content, nil
 }

@@ -23,27 +23,14 @@ func RenderHTMLTag(selection *goquery.Selection) string {
 func ReadFromURI(uri string) ([]byte, error) {
 	res, err := http.Get(uri)
 	if err != nil {
-		Log.E(err.Error())
-		return nil, errors.Wrap(err, "Cannot get response")
+		return nil, errors.Wrap(err, "unable to get response")
 	}
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		Log.E(err.Error())
-		return nil, errors.Wrap(err, "Cannot read from stream reader")
+		return nil, errors.Wrap(err, "unable to read the stream")
 	}
 	return body, nil
-}
-
-func HE(err error) error {
-	Log.E(err.Error())
-	return err
-}
-
-func HEM(err error, msg string) error {
-	errors.Wrap(err, msg)
-	Log.E(err.Error())
-	return err
 }
 
 func Hash(input []byte) string {

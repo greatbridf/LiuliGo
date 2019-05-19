@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/greatbridf/LiuliGo/liuli"
+	"github.com/pkg/errors"
 )
 
 func main() {
@@ -20,7 +21,7 @@ func main() {
 		}
 		articles, err := liuli.GetArticles(page)
 		if err != nil {
-			liuli.PrintError(err.Error())
+			liuli.PrintError(err)
 			return
 		}
 		articles.Print()
@@ -28,12 +29,12 @@ func main() {
 	case "content":
 		id := query.Get("id")
 		if id == "" {
-			liuli.PrintError("No content id given")
+			liuli.PrintError(errors.New("No content id given"))
 			return
 		}
 		content, err := liuli.GetContent(id)
 		if err != nil {
-			liuli.PrintError(err.Error())
+			liuli.PrintError(err)
 		} else {
 			fmt.Printf("Content-Type: text/html; charset=utf-8\n\n")
 			fmt.Println(content)
@@ -42,12 +43,12 @@ func main() {
 	case "magnet":
 		id := query.Get("id")
 		if id == "" {
-			liuli.PrintError("No content id given")
+			liuli.PrintError(errors.New("No content id given"))
 			return
 		}
 		magnet, err := liuli.GetMagnet(id)
 		if err != nil {
-			liuli.PrintError(err.Error())
+			liuli.PrintError(err)
 			return
 		}
 		magnet.Print()
@@ -55,18 +56,18 @@ func main() {
 	case "delete":
 		id := query.Get("id")
 		if id == "" {
-			liuli.PrintError("No content id given")
+			liuli.PrintError(errors.New("No content id given"))
 			return
 		}
 		result, err := liuli.DeleteResource(id)
 		if err != nil {
-			liuli.PrintError(err.Error())
+			liuli.PrintError(err)
 			return
 		}
 		result.Print()
 		break
 	default:
-		liuli.PrintError("Invalid query method")
+		liuli.PrintError(errors.New("Invalid query method"))
 		break
 	}
 }

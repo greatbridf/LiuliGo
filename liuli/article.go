@@ -24,12 +24,10 @@ func GetArticles(page string) (Articles, error) {
 	}
 	doc, err := goquery.NewDocument(uri)
 	if err != nil {
-		Log.E(err.Error())
 		return nil, errors.Wrap(err, ERR_CANNOT_GOQUERY)
 	}
 	articles, err := GetArticleArray(doc)
 	if err != nil {
-		Log.E(err.Error())
 		return nil, errors.Wrap(err, "Cannot get article array")
 	}
 	return articles, nil
@@ -74,8 +72,7 @@ func GetArticleArray(doc *goquery.Document) (Articles, error) {
 		articles = append(articles, tmp)
 	})
 	if ERR != nil {
-		Log.E(ERR.Error())
-		return nil, ERR
+		return nil, errors.WithStack(ERR)
 	}
 	return articles, nil
 }

@@ -23,27 +23,27 @@ func (c *Cache) Init() error {
 		if os.IsNotExist(err) {
 			err = os.Mkdir("caches", 0775)
 			if err != nil {
-				return HE(err)
+				return errors.WithStack(err)
 			}
 		} else {
-			return HE(err)
+			return errors.WithStack(err)
 		}
 	}
 	index, err := sql.Open("sqlite3", "index.db")
 	c.index = index
 	if err != nil {
-		return HE(err)
+		return errors.WithStack(err)
 	}
 	// Test if the database exists
 	rows, err := c.index.Query("SELECT hash,name FROM `index`")
 	if err != nil {
 		create, err := c.index.Prepare("CREATE TABLE `index`(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, hash TEXT)")
 		if err != nil {
-			return HE(err)
+			return errors.WithStack(err)
 		}
 		_, err = create.Exec()
 		if err != nil {
-			return HE(err)
+			return errors.WithStack(err)
 		}
 		return nil
 	}
@@ -54,7 +54,7 @@ func (c *Cache) Init() error {
 		var name string
 		err := rows.Scan(&hash, &name)
 		if err != nil {
-			return HE(err)
+			return errors.WithStack(err)
 		}
 		c.list[name] = hash
 		c.rev[hash] = name
@@ -68,15 +68,15 @@ func (c *Cache) Add(id string, data []byte) error {
 	c.rev[hash] = id
 	err := ioutil.WriteFile("caches/"+hash, data, 0666)
 	if err != nil {
-		return HEM(err, "Cannot write cache file")
+		return errors.Wrap(err, "unable to write cache")
 	}
 	stmt, err := c.index.Prepare("INSERT INTO `index`(name, hash) VALUES(?, ?)")
 	if err != nil {
-		return HE(err)
+		return errors.WithStack(err)
 	}
 	_, err = stmt.Exec(id, hash)
 	if err != nil {
-		return HE(err)
+		return errors.WithStack(err)
 	}
 	Log.D("Add " + id + " to cache!")
 	return nil
@@ -85,7 +85,7 @@ func (c *Cache) Add(id string, data []byte) error {
 func (c Cache) Get(id string) ([]byte, error) {
 	data, err := ioutil.ReadFile("caches/" + c.GetHash(id))
 	if err != nil {
-		return nil, HE(errors.WithStack(err))
+		return nil, errors.WithStack(err)
 	}
 	PrintDebug("Get " + id + " from cache")
 	return data, nil
@@ -104,11 +104,11 @@ func (c *Cache) Remove(id string) error {
 	delete(c.list, id)
 	stmt, err := c.index.Prepare("DELETE FROM `index` WHERE name=?")
 	if err != nil {
-		return HE(err)
+		return errors.WithStack(err)
 	}
 	_, err = stmt.Exec(id)
 	if err != nil {
-		return HE(err)
+		return errors.WithStack(err)
 	}
 	return nil
 }

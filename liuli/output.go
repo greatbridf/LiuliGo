@@ -33,17 +33,17 @@ func init() {
 }
 
 // PrintError Print error message to stdout
-func PrintError(msg string) {
-	Log.E(msg)
+func PrintError(e error) {
+	Log.Err(e)
 	fmt.Printf("Content-Type: application/json; charset=utf-8\n\n")
 	resp := LiuliResp{
 		400,
-		msg,
+		e.Error(),
 		nil,
 	}
 	json, err := respStringify(resp)
 	if err != nil {
-		Log.E(err.Error())
+		Log.Err(err)
 		return
 	}
 	fmt.Println(json)
@@ -60,7 +60,7 @@ func (data Articles) Print() {
 	}
 	json, err := respStringify(resp)
 	if err != nil {
-		PrintError(err.Error())
+		PrintError(err)
 		return
 	}
 	fmt.Printf("Content-Type: application/json; charset=utf-8\n\n")
@@ -78,7 +78,7 @@ func (data Magnets) Print() {
 	}
 	json, err := respStringify(resp)
 	if err != nil {
-		PrintError(err.Error())
+		PrintError(err)
 		return
 	}
 	fmt.Printf("Content-Type: application/json; charset=utf-8\n\n")
@@ -93,7 +93,7 @@ func (data DeleteResult) Print() {
 	}
 	json, err := respStringify(resp)
 	if err != nil {
-		PrintError(err.Error())
+		PrintError(err)
 		return
 	}
 	fmt.Printf("Content-Type: application/json; charset=utf-8\n\n")
@@ -103,7 +103,6 @@ func (data DeleteResult) Print() {
 func respStringify(resp LiuliResp) (string, error) {
 	out, err := json.Marshal(resp)
 	if err != nil {
-		Log.E(err.Error())
 		return "", errors.Wrap(err, "cannot stringify json")
 	}
 	return string(out), nil
