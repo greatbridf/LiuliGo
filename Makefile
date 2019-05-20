@@ -3,6 +3,7 @@ os = linux
 arch = amd64
 buildargs = GOOS=$(os)
 buildargs += GOARCH=$(arch)
+buildargs += CGO_ENABLED=1
 
 LiuliGo.cgi : $(source)
 	go get -d -v ./...
