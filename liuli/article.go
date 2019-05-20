@@ -2,6 +2,7 @@ package liuli
 
 import (
 	"github.com/pkg/errors"
+	"sync"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -35,44 +36,69 @@ func GetArticles(page string) (Articles, error) {
 
 // GetArticleArray get Article Objects from goquery document
 func GetArticleArray(doc *goquery.Document) (Articles, error) {
-	var articles Articles
-	var ERR error
-	cache := Cache{}
+	var (
+		articles  Articles
+		mux       sync.Mutex
+		waitGroup sync.WaitGroup
+		cache     Cache
+	)
 	err := cache.Init()
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
 	defer cache.Close()
-	doc.Find("article").Each(func(index int, selection *goquery.Selection) {
-		if ERR != nil {
-			return
-		}
-		tmp := Article{
-			Description: selection.Find(".entry-content").Text(),
-			Title:       selection.Find(".entry-title").Text(),
-		}
-		if tmp.Title == "" {
-			return
-		}
-		tmp.Link, _ = selection.Find(".more-link").Attr("href")
-		img_link, _ := selection.Find("img").Attr("src")
-		if !cache.Find(img_link) {
-			data, err := ReadFromURI(img_link)
-			if err != nil {
-				ERR = errors.Wrap(err, "Cannot get title image")
+
+	selections := doc.Find("article")
+	waitGroup.Add(len(selections.Nodes))
+	chError := make(chan error, len(selections.Nodes))
+
+	selections.Each(func(index int, selection *goquery.Selection) {
+		go func(index int, selection *goquery.Selection) {
+			defer waitGroup.Done()
+
+			title := selection.Find(".entry-title").Text()
+			if title == "" {
 				return
 			}
-			err = cache.Add(img_link, data)
-			if err != nil {
-				ERR = errors.Wrap(err, "Cannot add title image to cache")
-				return
+
+			description := selection.Find(".entry-content").Text()
+			next_link, _ := selection.Find(".more-link").Attr("href")
+			img_link, _ := selection.Find("img").Attr("src")
+
+			if !cache.Find(img_link) {
+				data, err := ReadFromURI(img_link)
+				if err != nil {
+					chError <- err
+					return
+				}
+
+				err = cache.Add(img_link, data)
+				if err != nil {
+					chError <- err
+					return
+				}
 			}
-		}
-		tmp.Img = "https://static.greatbridf.top/liuli/" + cache.GetHash(img_link)
-		articles = append(articles, tmp)
+
+			article := Article{
+				description,
+				"https://static.greatbridf.top/liuli/" + cache.GetHash(img_link),
+				next_link,
+				title,
+			}
+
+			mux.Lock()
+			articles = append(articles, article)
+			mux.Unlock()
+		}(index, selection)
 	})
-	if ERR != nil {
-		return nil, errors.WithStack(ERR)
+
+	waitGroup.Wait()
+	close(chError)
+
+	err, ok := <-chError
+	if ok && err != nil {
+		return nil, err
 	}
+
 	return articles, nil
 }
