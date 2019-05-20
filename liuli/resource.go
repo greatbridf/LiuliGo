@@ -5,8 +5,8 @@ import (
 )
 
 type DeleteResult struct {
-	result int
-	msg    string
+	Code int
+	Msg  string
 }
 
 func DeleteResource(id string) (*DeleteResult, error) {
