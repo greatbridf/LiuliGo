@@ -2,6 +2,7 @@ package liuli
 
 import (
 	"github.com/pkg/errors"
+	"sort"
 	"sync"
 
 	"github.com/PuerkitoBio/goquery"
@@ -13,6 +14,7 @@ type Article struct {
 	Img         string `json:"img"`
 	Link        string `json:"link"`
 	Title       string `json:"title"`
+	id          int
 }
 
 type Articles []Article
@@ -84,6 +86,7 @@ func GetArticleArray(doc *goquery.Document) (Articles, error) {
 				"https://static.greatbridf.top/liuli/" + cache.GetHash(img_link),
 				next_link,
 				title,
+				index,
 			}
 
 			mux.Lock()
@@ -99,6 +102,9 @@ func GetArticleArray(doc *goquery.Document) (Articles, error) {
 	if ok && err != nil {
 		return nil, err
 	}
+	sort.Slice(articles, func(i, j int) bool {
+		return articles[i].id < articles[j].id
+	})
 
 	return articles, nil
 }
